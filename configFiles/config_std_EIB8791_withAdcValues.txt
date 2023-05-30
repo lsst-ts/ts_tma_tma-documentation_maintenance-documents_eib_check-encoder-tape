@@ -1,0 +1,77 @@
+##################################################################################################
+# HEIDENHAIN GmbH					                                                Bi, 18.06.2015
+#
+# Example configuration file for an EIB8791 provided with the EIB8 driver and EIB8AppXX.exe   
+#
+# Configurates a UDP transfer as example_udp.c
+# For using the file with EIB8AppXX.exe rename file e.g. to c1.txt
+# Connect and type 'c1' in EIB8AppXX.exe
+#
+# Modify MAC, IP and port due to your host in the file!
+#
+# Execute eib8_reset_idle()
+# Load file to the EIB8791 (trigger is not activated: EIB8;trig_ptm_in:freq_config;0)
+# Activate trigger with e.g. EIB8;trig_ptm_in:freq_config;1000
+#
+# Remark:
+# Configuration activates 8 axis. If there is no encoder connected, axis generates an error event: "axis input signal amplitue too low" 
+# For deactivating an axis see configuration at end of this file
+#
+##################################################################################################
+#
+EIB8;trig_ptm_in:source;internal;
+EIB8;trig_ptm_in:freq_config;0;
+EIB8;trig_bus1_out:inputs;trig_ptm_in;
+EIB8;trig_bus1_out:enable;1;
+EIB8;trig_bus1_out:transmitter;1;
+EIB8;pdl_tx_from_slots_to_lane_1:slot_1;1;
+EIB8;pdl_tx_from_slots_to_lane_1:slot_2;1;
+EIB8;pdl_tx_from_slots_to_lane_1:slot_3;1;
+EIB8;pdl_tx_from_slots_to_lane_1:slot_4;1;
+EIB8;pdl_forwarding_ram_udp:slot_1;0x11,0x12,0x13,0x14;
+EIB8;pdl_forwarding_ram_udp:slot_2;0x21,0x22,0x23,0x24;
+EIB8;pdl_forwarding_ram_udp:slot_3;0x31,0x32,0x33,0x34;
+EIB8;pdl_forwarding_ram_udp:slot_4;0x41,0x42,0x43,0x44;
+#
+# Set MAC, IP and port address, where UDP packets of the EIB8 are sent to (example), e.g. discover MAC address with eib8_discover_MAC_from_IP() or EIB8App32/64.exe -> "mac"
+EIB8;udp_transfer:udp_dest_mac;90.e2.ba.03.9c.eb;
+EIB8;udp_transfer:udp_dest_ip;192.168.168.100;
+EIB8;udp_transfer:udp_dest_port;3051;
+EIB8;pdl_forwarding_ram_udp:mode;batch_soft_realtime;
+#
+SLOT00;trig_sync1_in:input;trig_bus1_in;
+SLOT00;trig_bus1_in:enable;1;
+SLOT00;trig_sync1_in:enable;1;
+#
+SLOT01;pdl_packets:axis_1;0x11:position,0x13:adc;
+SLOT01;pdl_packets:axis_2;0x12:position,0x14:adc;
+SLOT02;pdl_packets:axis_1;0x21:position,0x23:adc;
+SLOT02;pdl_packets:axis_2;0x22:position,0x24:adc;
+SLOT03;pdl_packets:axis_1;0x31:position,0x33:adc;
+SLOT03;pdl_packets:axis_2;0x32:position,0x34:adc;
+SLOT04;pdl_packets:axis_1;0x41:position,0x43:adc;
+SLOT04;pdl_packets:axis_2;0x42:position,0x44:adc;
+#
+SLOT00:AXIS00;trigger:inputs;trig_sync1_in;
+SLOT00:AXIS00;encoder_config:type;linear;
+SLOT00:AXIS00;encoder_config:interface;1V_pp_0_90;
+SLOT00:AXIS00;encoder_config:reference_type;single;
+SLOT00:AXIS00;encoder_config:line_cnt;0;
+SLOT00:AXIS00;encoder_config:ref_increment;0;
+SLOT00:AXIS00;encoder_config:limit_signal_1_present;0;
+SLOT00:AXIS00;encoder_config:limit_signal_2_present;0;
+SLOT00:AXIS00;encoder_config:homing_signal_present;0;
+SLOT00:AXIS00;encoder_config:limit_signal_2_present;0;
+SLOT00:AXIS00;encoder:supply_enable;1;
+SLOT00:AXIS00;encoder_processing:online_comp_enable;1;
+SLOT00:AXIS00;encoder_processing:waveform_comp_enable;0;
+SLOT00:AXIS00;pos_value_filter:active;1;
+SLOT00:AXIS00;pos_value_filter:characteristic;linear; 
+SLOT00:AXIS00;pos_value_filter:bandwidth;high;
+SLOT00:AXIS00;pos_value_filter:measure_time;0;
+SLOT00:AXIS00;pdl:output_active;1;
+#
+# DEACIVATE ONE AXIS if not connected, e.g. SLOT04:AXIS00
+# SLOT04:AXIS00;trigger:inputs;;
+# SLOT04:AXIS00;encoder:supply_enable;0;
+#
