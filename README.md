@@ -49,14 +49,21 @@ First the telescope must be positioned in the star position.
 - Open the PAS4000 and the last version of the TMA safety project (TMA_IS1). The support PC, has the last version of this project hosted in this [repo](https://gitlab.tekniker.es/aut/projects/3151-LSST/SafetyCode/TMA_IS.git).
 - Open the variable list and run the observing of the variables
   ![Open Variable List](media/OpenVariableList.png)
+  ![Start Observing variable list](media/StartObserving.png)
 - Force sdiLIMAZWPOS and sdiLIMAZWNEG
+  ![Force ACW Variables](media/ForceACWVariables.png)
   - It is also recommend to force  
 - Check that the variables are forced
+  ![Check the variables are forced](media/CheckVariablesAreForced.png)
 - Start axis commissioning in the Indraworks
+  ![Axis commissioning](media/AxisCommisioning.png)
   - If commanding of the motors is not possible because there is PLC program active, stop the PLC application
+  ![Axis Commanding Not Possible](media/AxisCommanginNotPosible.png)
+  ![Stop PLC Aplication](media/StopPLCProgram.png)
 - Activate one AZCW axis
-- Control the brake
-- Move to 550 deg (this is 360+190 deg)
+- Release the Azimuth brake putting the bDebugAzBrake to True
+- Move to 550 deg (this is 360+190 deg) or to 170 (360-190 deg) the one is closest to the actual position [^1].
+[^1]: The AZCW shows the azimuth position +360 deg. So when moving AZCW to 550 or 170 deg the Azimuth axis is moved to 190 or -190 deg.
 - Engage the brake
 - Connectg to the EIB using the Heidenhain application
 - Load the configuration file to the application
@@ -77,8 +84,50 @@ First the telescope must be positioned in the star position.
 - Engage the brake
 - Move AZCW to 173 deg
 - Unforce all the forced variables
-   
+- Switch off the drive
+- Start the PLC application
+- Check the Bosch Telemetry is running properly
+  - Balancing system
+- Close the Indraworks
+- Exit the EUI
+- Reboot the AxesPXI
+  - Connect to the AxesPXI using ssh and check that the connected PXI is the AxePXI
+```bash
+$ ssh admin@139.229.171.26
+NI Linux Real-Time (run mode)
 
+Log in with your NI-Auth credentials.
+
+admin@139.229.171.26's password:
+Last login: Tue May 30 16:20:11 2023 from 139.229.171.5
+
+ █████  ██   ██ ███████ ███████       ██████  ██   ██ ██
+██   ██  ██ ██  ██      ██            ██   ██  ██ ██  ██
+███████   ███   █████   ███████ █████ ██████    ███   ██
+██   ██  ██ ██  ██           ██       ██       ██ ██  ██
+██   ██ ██   ██ ███████ ███████       ██      ██   ██ ██
+
+```
+  - Reboot the PXI
+```bash
+  admin@AxesPXI:~# reboot
+```
+- Wait for AxesPXI to restart. Check with a ping.
+- Check that the AxesPXI restarted properly
+```bash
+admin@AxesPXI:~# cat /var/log/messages | grep LabVIEW_Custom
+2023-05-30T16:12:23.216+00:00 AxesPXI LabVIEW_Custom_Log: Main Started
+2023-05-30T16:12:28.216+00:00 AxesPXI LabVIEW_Custom_Log: Main axes task launched
+2023-05-30T16:12:28.217+00:00 AxesPXI LabVIEW_Custom_Log: Encoder task launched
+2023-05-30T16:12:28.221+00:00 AxesPXI LabVIEW_Custom_Log: Timed Loops Processors: Control Loop Azimuth: 5
+2023-05-30T16:12:28.225+00:00 AxesPXI LabVIEW_Custom_Log: Timed Loops Processors: Control Loop Elevation: 6
+2023-05-30T16:12:28.818+00:00 AxesPXI LabVIEW_Custom_Log: Timed Loops Processors: Trajectory Loop Azimuth: 4
+2023-05-30T16:12:31.410+00:00 AxesPXI LabVIEW_Custom_Log: Timed Loops Processors: Trajectory Loop Elevation: 4
+2023-05-30T16:12:34.902+00:00 AxesPXI LabVIEW_Custom_Log: Timed Loops Processors: Monitoring Loop 1: 2
+2023-05-30T16:12:35.401+00:00 AxesPXI LabVIEW_Custom_Log: Timed Loops Processors: Encoder UPD Loop: 7
+```
+- Start the EUI
+- Open the Encoder window and start the encoder and check it works correctly, without faults. Perhaps it needs a couple of reset-power actions.
 
 Download the [Configuration file](configFiles/config_std_EIB8791_withAdcValues.txt) from the repo.
 
