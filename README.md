@@ -14,7 +14,6 @@
   - [Azimuth Tape](#azimuth-tape)
     - [Procedure](#procedure)
     - [Execution](#execution)
-      - [Configure the EIB](#configure-the-eib)
   - [Elevation Tape](#elevation-tape)
 
 ## Introduction
@@ -41,53 +40,94 @@ The following steps must be performed
 
 ### Execution
 
-#### Configure the EIB
-
-First the telescope must be positioned in the star position.
+Next steps shows how to perform the capture of the data. During this operation the brakes are forced to release in some places. Make sure that the system is safe before releasing the brakes. To engage the brake there are two options, unforce the brakes or press a E-Stop (actually any interlock to the azimuth axis will engage the brakes automatically).
 
 - Start the OSS using the EUI
+- Check that there are not any interlocks for the azimuth axis.
 - Open the PAS4000 and the last version of the TMA safety project (TMA_IS1). The support PC, has the last version of this project hosted in this [repo](https://gitlab.tekniker.es/aut/projects/3151-LSST/SafetyCode/TMA_IS.git).
 - Open the variable list and run the observing of the variables
   ![Open Variable List](media/OpenVariableList.png)
   ![Start Observing variable list](media/StartObserving.png)
 - Force sdiLIMAZWPOS and sdiLIMAZWNEG
   ![Force ACW Variables](media/ForceACWVariables.png)
-  - It is also recommend to force  
-- Check that the variables are forced
+  - It is also recommend to force sdoHasStopOss and sdoSoftStopOss to avoid affecting the OSS if a E-Stop must be pressed during the test.
+- Check that the variables are forced.
   ![Check the variables are forced](media/CheckVariablesAreForced.png)
-- Start axis commissioning in the Indraworks
+- Start axis commissioning in the Indraworks.
   ![Axis commissioning](media/AxisCommisioning.png)
-  - If commanding of the motors is not possible because there is PLC program active, stop the PLC application
+  - If commanding of the motors is not possible because there is PLC program active, stop the PLC application.
   ![Axis Commanding Not Possible](media/AxisCommanginNotPosible.png)
   ![Stop PLC Aplication](media/StopPLCProgram.png)
-- Activate one AZCW axis
-- Release the Azimuth brake putting the bDebugAzBrake to True
+- Activate one AZCW axis in the Indraworks (AZCW_Axis1 or AZCW_Axis2).
+- Release the Azimuth brake putting the bDebugAzBrake to True.
+  ![Release Azimuth Brake](media/ReleaseAzimuthBrake.png)
+- Wait until the brakes are released. The variable stmBrakeAZ monitors the brakes status, and all brakes are released when this variables shows 50.
+  ![Azimuth Brakes Released](media/AzimuthBrakesReleased.png)
 - Move to 550 deg (this is 360+190 deg) or to 170 (360-190 deg) the one is closest to the actual position [^1].
+  - Select the positioning tab.
+  - Set the position to 550 or 170.
+  - Set the velocity (maximum velocity 0.04rpm).
+  - Set the acceleration (maximum acceleration 0.1 rad/s^2).
+  - Set the deceleration (maximum acceleration 1 rad/s^2).
+  - Set the Jerk to 0.
+  ![Move AZCW axis](media/MoveTheAZCW.png)
 [^1]: The AZCW shows the azimuth position +360 deg. So when moving AZCW to 550 or 170 deg the Azimuth axis is moved to 190 or -190 deg.
-- Engage the brake
-- Connectg to the EIB using the Heidenhain application
+- Wait until movement finished. The selected drive achieved the settled position.
+- Engage the brake putting the bDebugAzBrake to False.
+- Connect to the EIB using the Heidenhain's EIB8 application.
+  - Open EIB8Application.exe.
+  - Set the IP Adress of the EIB to 139.229.171.20.
+  - Click connect button.
+  ![Connect To EIB](media/ConnectToEIB.png)
 - Load the configuration file to the application
-- Change the IP and the mac for the UDP host
+  - In the EIB application go to Configuration window.
+  - Press the "Get Config List From File" and navigate to the configuration file.
+  - The configuration file must be the one provided by Heidenhain. It is in this repo. [Configuration file](configFiles/config_std_EIB8791_withAdcValues.txt).
+  ![Load EIB Configuration File](media/LoadConfigFile.png)
+- Change the IP and the mac for the UDP host in the configuration window
+  ![UDP host IP and MAC settings for the EIB](media/IPandMacConfiguration.png)
+  - The mac could be checked in the EIB8 application, in the Application window. Also any other windows tool could be used to check the mac for the selected NIC.
+  ![Check the MAC in the EIB Application](media/CheckMacInEIBApp.png)
+  - The values for the Tekniker support PC are
+    - IP: 139.229.171.5
+    - MAC: 00.13.3b.5b.23.e4
 - Write the configuration to the EIB
-- Enable the PTM
-- Check the communication
-- Configure the UDP
-- Start the UDP dumping
-- Release the brake
+  ![Write the Configuration to the EIB](media/WriteEIBConfig.png)
+- Configure the frequency at 10kHz
+  - The rotation speed will be 0.04rmp=0.24deg/s. So it will take 1500s to rotate 360deg
+  - The azimuth tape has 1200000lines. So 1200000lines/1500s=800lines/s=800Hz. As Heidenhain ask to have at least 10 point between lines the frequency must be at least 8kHz.
+  ![Configure the Acquisition Frequency in the EIB](media/ChangeEIBFrequency.png)
+- Enable the PTM to start getting data from the EIB
+  ![Enable PTM](media/EnablePTM.png)
+- Check the communication.
+  - Go to UDP display window and click "UDP PD Receiving and Displaying" button
+  - Check that data is received in the table
+  ![Check UPD communication](media/CheckUPDCommunication.png)
+- Configure the UDP data dumping.
+  - Go to UPD Dumping window
+  - In the "File for dumping data" insert the path to the file to store de data or navigate to the location. Use a new file.
+  - In the "Dumping format" select the "EIB8_PDL_DUMP_RAW_BINARY" format
+  ![Configure UPD data dumping](media/UDPdataDumpingConfiguration.png)
+- Start the UDP dumping by clicking in the "UDP PD Dump Start" button.
+  ![Start UPD dumping](media/StartUPDDumping.png)
+- Release the brake putting the bDebugAzBrake to True.
 - Start movement with ACW
-  - 0.04rmp=0.24deg/s --> 1500s
-  - 1200000lines/1500s=800lines/s=800Hz per line. At least 8kHz.
-  - Start going to 400 deg
-  - When the axis is close to 400 deg change the setpoint to 300 deg
-  - When the axis is close to 360 deg change the setpoint to 170 deg
-- When the axis stops because the last position (170 deg) is reached, stop the UPD dumping
-- Engage the brake
-- Move AZCW to 173 deg
-- Unforce all the forced variables
-- Switch off the drive
-- Start the PLC application
+  - Start going to 400 deg if the movement starts in 550 deg(or 320 if the movement started in 170 deg). This avoids the AZCW start moving in opposite direction to the desired one, because it detects that the destination is closed closing the impossible turn.
+  - When the axis is close to 400 deg change the setpoint to 300 deg (or 420 if the movement started in 170 deg)
+  - When the axis is close to 360 deg change the setpoint to 170 deg (or 550 if the movement started in 170 deg)
+- When the axis stops because the last position (170 deg or 550 deg) is reached, stop the UPD dumping
+- Engage the brake putting the bDebugAzBrake to False
+- Move AZCW to 173 deg (or to 547 deg).
+- Unforce all the forced variables in the PAS4000.
+- Disable the drive in the Indraworks
+- Start the PLC application in the Indraworks
 - Check the Bosch Telemetry is running properly
-  - Balancing system
+  - In the EUI open the Balancing system window
+  - Switch on all the Balancing axes
+  - Select one balancing axis and copy the actual position
+  ![Copy the actual position](media/BalancingWindow.png)
+  - Move 5 mm and check the position data is actualized properly
+  - Move again to the copied position.
 - Close the Indraworks
 - Exit the EUI
 - Reboot the AxesPXI
@@ -127,9 +167,6 @@ admin@AxesPXI:~# cat /var/log/messages | grep LabVIEW_Custom
 2023-05-30T16:12:35.401+00:00 AxesPXI LabVIEW_Custom_Log: Timed Loops Processors: Encoder UPD Loop: 7
 ```
 - Start the EUI
-- Open the Encoder window and start the encoder and check it works correctly, without faults. Perhaps it needs a couple of reset-power actions.
-
-Download the [Configuration file](configFiles/config_std_EIB8791_withAdcValues.txt) from the repo.
-
+- Open the Encoder window and power on the encoder and check it works correctly, without faults. Perhaps it needs a couple of reset-power actions.
 
 ## Elevation Tape
