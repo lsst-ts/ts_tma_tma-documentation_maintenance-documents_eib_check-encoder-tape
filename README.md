@@ -50,7 +50,7 @@ Next steps shows how to perform the capture of the data. During this operation t
 - Open the variable list and run the observing of the variables.
   ![Open Variable List](media/OpenVariableList.png)
   ![Start Observing variable list](media/StartObserving.png)
-- Force sdiLIMAZWPOS and sdiLIMAZWNEG.
+- Force the azimuth cable wrap limits. Force the variables sdiLIMAZWPOS and sdiLIMAZWNEG.
   ![Force ACW Variables](media/ForceACWVariables.png)
   - It is also recommend to force sdoHasStopOss and sdoSoftStopOss to avoid affecting the OSS if a E-Stop must be pressed during the test.
 - Check that the variables are forced.
@@ -60,8 +60,8 @@ Next steps shows how to perform the capture of the data. During this operation t
   - If commanding of the motors is not possible because there is PLC program active, stop the PLC application.
   ![Axis Commanding Not Possible](media/AxisCommanginNotPosible.png)
   ![Stop PLC Aplication](media/StopPLCProgram.png)
-- Activate one AZCW axis in the Indraworks (AZCW_Axis1 or AZCW_Axis2).
-- Release the Azimuth brake putting the bDebugAzBrake to True.
+- Activate one AZCW axis in the Indraworks (AZCW_Axis1 or AZCW_Axis2). Press enable in the windows shown above.
+- In the PAS4000, release the Azimuth brake putting the bDebugAzBrake to True.
   ![Release Azimuth Brake](media/ReleaseAzimuthBrake.png)
 - Wait until the brakes are released. The variable stmBrakeAZ monitors the brakes status, and all brakes are released when this variables shows 50.
   ![Azimuth Brakes Released](media/AzimuthBrakesReleased.png)
@@ -72,10 +72,11 @@ Next steps shows how to perform the capture of the data. During this operation t
   - Set the acceleration (maximum acceleration 0.1 rad/s^2).
   - Set the deceleration (maximum acceleration 1 rad/s^2).
   - Set the Jerk to 0.
+  - Press "Execute" button.
   ![Move AZCW axis](media/MoveTheAZCW.png)
 [^1]: The AZCW shows the azimuth position +360 deg. So when moving AZCW to 550 or 170 deg the Azimuth axis is moved to 190 or -190 deg.
 - Wait until movement finished. The selected drive achieved the settled position.
-- Engage the brake putting the bDebugAzBrake to False.
+- In the PAS4000, Engage the brake putting the bDebugAzBrake to False.
 - Connect to the EIB using the Heidenhain's EIB8 application.
   - Open EIB8Application.exe.
   - Set the IP Adress of the EIB to 139.229.171.20.
@@ -112,14 +113,20 @@ Next steps shows how to perform the capture of the data. During this operation t
   ![Configure UPD data dumping](media/UDPdataDumpingConfiguration.png)
 - Start the UDP dumping by clicking in the "UDP PD Dump Start" button.
   ![Start UPD dumping](media/StartUPDDumping.png)
-- Release the brake putting the bDebugAzBrake to True.
-- Start movement with ACW.
-  - Start going to 400 deg if the movement starts in 550 deg(or 320 if the movement started in 170 deg). This avoids the AZCW start moving in opposite direction to the desired one, because it detects that the destination is closed closing the impossible turn.
-  - When the axis is close to 400 deg change the setpoint to 300 deg (or 420 if the movement started in 170 deg).
-  - When the axis is close to 360 deg change the setpoint to 170 deg (or 550 if the movement started in 170 deg).
-- When the axis stops because the last position (170 deg or 550 deg) is reached, stop the UPD dumping.
-- Engage the brake putting the bDebugAzBrake to False.
-- Move AZCW to 173 deg (or to 547 deg).
+- In the PAS4000, release the brake putting the bDebugAzBrake to True.
+- In the Indraworks, start movement with ACW. This movement must be executed in several movement commands, but each command must be executed before the one before finishes.
+  - Select the positioning tab.
+  - Set the position to 400 deg if the movement starts in 550 deg (or 320 if the movement started in 170 deg). This avoids the AZCW starts moving in opposite direction to the desired one, because it detects that the destination is closed to actual position (For the ACW axis 720 degrees is the same as 0, so going to 720 degrees and then to 170 is shorter than going down to 170 degrees).
+  - Set the velocity (maximum velocity 0.04rpm).
+  - Set the acceleration (maximum acceleration 0.1 rad/s^2).
+  - Set the deceleration (maximum acceleration 1 rad/s^2).
+  - Set the Jerk to 0.
+  - Press "Execute" button.
+  - When the axis is close to 400 deg change the setpoint to 300 deg (or 420 if the movement started in 170 deg) and press "Execute" button.
+  - When the axis is close to 360 deg change the setpoint to 170 deg (or 550 if the movement started in 170 deg) and press "Execute" button.
+- When the axis stops because the last position (170 deg or 550 deg) is reached, stop the UPD dumping in EIB8 application.
+- In the PAS4000, engage the brake putting the bDebugAzBrake to False.
+- In the Indraworks, move AZCW to 173 deg (or to 547 deg).
 - Unforce all the forced variables in the PAS4000.
 - Disable the drive in the Indraworks.
 - Start the PLC application in the Indraworks.
