@@ -326,6 +326,7 @@ Some of the steps shown for elevation are equivalent to ones in the azimuth axis
   - In the "Dumping format" select the "EIB8_PDL_DUMP_RAW_BINARY" format.
 - Start the UDP dumping by clicking in the "UDP PD Dump Start" button.
 - In the PAS4000, release the brake putting the bDebugElBrake to True.
+
   ![Release Elevation Brakes](media/ReleaseElevatoinBrake.png)
 - Wait until the brakes are released. The variable stmBrakeEL monitors the brakes status, and all brakes are released when this variables shows 50.
 - start movement with drills.
@@ -333,9 +334,11 @@ Some of the steps shown for elevation are equivalent to ones in the azimuth axis
   - Open the "Axis" window
   - In the "Slot and axis actions: " controls select SLOT01 and AXIS02.
   - Click the Position button
-  - The Counter shows the number of lines counted during the movement. The movement should increase/decrease by less than 1000lines/s
-![Check Movement with EIB position](media/ReleaseElevationBrake.png)
-- If elevation must stop 
+  - The Counter shows the number of lines counted during the movement. The movement should increase/decrease by less than 1000lines/s.
+
+![Check Movement with EIB position](media/VerificyEncoderPosition.png)
+
+- If elevation must stop
   - In EIB8 application, go to UDP dumping window and stop the UPD damping
   - In the PAS4000, engage the brake putting the bDebugElBrake to False.
   - In EIB8 application, in the UPD dumping change the "File for dumping data" name.
