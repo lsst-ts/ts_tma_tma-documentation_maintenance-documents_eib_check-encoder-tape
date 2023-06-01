@@ -297,10 +297,160 @@ Some of the steps shown for elevation are equivalent to ones in the azimuth axis
 - Make sure that winches are taut.
 - Open the PAS4000 and the last version of the TMA safety project (TMA_IS1). The support PC, has the last version of this project hosted in this [repo](https://gitlab.tekniker.es/aut/projects/3151-LSST/SafetyCode/TMA_IS.git).
 - Open the variable list and run the observing of the variables.
-- Force the oss variables
-- configure eib
-- Start upd
-- Release brake
-- start movement
-- The speed can be verified in the "Axis" window
+- Force the OSS variables sdoHasStopOss and sdoSoftStopOss to avoid affecting the OSS if a E-Stop must be pressed during the test.
+- Check that the variables are forced.
 - If the axis must be stopped, stop the data capture and brake the axis if necessary (it is safer to brake the axis)
+- Connect to the EIB using the Heidenhain's EIB8 application.
+  - Open EIB8Application.exe.
+  - Set the IP Adress of the EIB to 139.229.171.20.
+  - Click connect button.
+- Load the configuration file to the application.
+  - In the EIB application go to Configuration window.
+  - Press the "Get Config List From File" and navigate to the configuration file.
+  - The configuration file must be the one provided by Heidenhain. It is in this repo. [Configuration file](configFiles/config_std_EIB8791_withAdcValues.txt).
+- Change the IP and the mac for the UDP host in the configuration window.
+  - The mac could be checked in the EIB8 application, in the Application window. Also any other windows tool could be used to check the mac for the selected NIC.
+  - The values for the Tekniker support PC are:
+    - IP: 139.229.171.5.
+    - MAC: 00.13.3b.5b.23.e4.
+- Write the configuration to the EIB.
+- Configure the frequency at 10kHz.
+  - This frequency allows a maximum speed of 1000 lines/s = 0.69 deg/s. How to check that is explained later.
+- Enable the PTM to start getting data from the EIB.
+- Check the communication.
+  - Go to UDP display window and click "UDP PD Receiving and Displaying" button.
+  - Check that data is received in the table.
+- Configure the UDP data dumping.
+  - Go to UPD Dumping window.
+  - In the "File for dumping data" insert the path to the file to store de data or navigate to the location. Use a new file.
+  - In the "Dumping format" select the "EIB8_PDL_DUMP_RAW_BINARY" format.
+- Start the UDP dumping by clicking in the "UDP PD Dump Start" button.
+- In the PAS4000, release the brake putting the bDebugElBrake to True.
+  ![Release Elevation Brakes](media/ReleaseElevatoinBrake.png)
+- Wait until the brakes are released. The variable stmBrakeEL monitors the brakes status, and all brakes are released when this variables shows 50.
+- start movement with drills.
+- The speed can be verified in the EIB8 appplication
+  - Open the "Axis" window
+  - In the "Slot and axis actions: " controls select SLOT01 and AXIS02.
+  - Click the Position button
+  - The Counter shows the number of lines counted during the movement. The movement should increase/decrease by less than 1000lines/s
+![Check Movement with EIB position](media/ReleaseElevationBrake.png)
+- If elevation must stop 
+  - In EIB8 application, go to UDP dumping window and stop the UPD damping
+  - In the PAS4000, engage the brake putting the bDebugElBrake to False.
+  - In EIB8 application, in the UPD dumping change the "File for dumping data" name.
+  - To start the movement again continue the same procedure but move elevation in the opposite sense of the movement at least 4000 lines to have a couple of references in both files before starting the UPD dumping.
+- When the movement is finished, stop the UPD dumping in EIB8 application.
+- In the PAS4000, engage the brake putting the bDebugElBrake to False.
+- Unforce all the forced variables in the PAS4000.
+- Exit the EUI.
+- Reboot the TMA-PXI.
+  - Connect to the TMA-PXI using ssh and check that the connected PXI is the TMA-PXI.
+
+```bash
+$ ssh admin@139.229.171.3
+NI Linux Real-Time (run mode)
+
+Log in with your NI-Auth credentials.
+
+Last login: Wed May 31 17:10:27 2023 from 139.229.171.5
+
+████████ ███    ███  █████        ██████  ██   ██ ██
+   ██    ████  ████ ██   ██       ██   ██  ██ ██  ██
+   ██    ██ ████ ██ ███████ █████ ██████    ███   ██
+   ██    ██  ██  ██ ██   ██       ██       ██ ██  ██
+   ██    ██      ██ ██   ██       ██      ██   ██ ██
+
+```
+
+  - Reboot the PXI
+
+```bash
+  admin@TMA-PXI:~# reboot
+```
+
+- Reboot the AxesPXI.
+  - Connect to the AxesPXI using ssh and check that the connected PXI is the AxesPXI.
+
+```bash
+$ ssh admin@139.229.171.26
+NI Linux Real-Time (run mode)
+
+Log in with your NI-Auth credentials.
+
+admin@139.229.171.26's password:
+Last login: Tue May 30 16:20:11 2023 from 139.229.171.5
+
+ █████  ██   ██ ███████ ███████       ██████  ██   ██ ██
+██   ██  ██ ██  ██      ██            ██   ██  ██ ██  ██
+███████   ███   █████   ███████ █████ ██████    ███   ██
+██   ██  ██ ██  ██           ██       ██       ██ ██  ██
+██   ██ ██   ██ ███████ ███████       ██      ██   ██ ██
+
+```
+
+  - Reboot the PXI
+
+```bash
+  admin@AxesPXI:~# reboot
+```
+
+- Wait for TMA-PXI to restart. Check with a ping.
+- Connect to TMA-PXI and check that the TMA-PXI restarted properly.
+
+```bash
+admin@TMA-PXI:~# cat /var/log/messages | grep LabVIEW_Custom
+2023-05-31T17:09:24.350+00:00 TMA-PXI LabVIEW_Custom_Log: Init RT_MCS_Main
+2023-05-31T17:09:41.311+00:00 TMA-PXI LabVIEW_Custom_Log: StartingTCPTask
+2023-05-31T17:09:43.252+00:00 TMA-PXI LabVIEW_Custom_Log: StartedTCPTaskAndDelaysSettingsReadDone
+2023-05-31T17:09:43.388+00:00 TMA-PXI LabVIEW_Custom_Log: SubscribeSubsystem: DiscreteStateReporting MinimumCommand: 2501 MaximumCommand: 2599 QueueRefsValid: TRUE
+2023-05-31T17:09:43.403+00:00 TMA-PXI LabVIEW_Custom_Log: SubscribeSubsystem: Safety MinimumCommand: 1801 MaximumCommand: 1899 QueueRefsValid: TRUE
+2023-05-31T17:09:43.437+00:00 TMA-PXI LabVIEW_Custom_Log: SafetyTask_Started
+2023-05-31T17:09:47.497+00:00 TMA-PXI LabVIEW_Custom_Log: BoschPowerSupplyTask started
+2023-05-31T17:09:47.500+00:00 TMA-PXI LabVIEW_Custom_Log: SubscribeSubsystem: BoschPowerSupply MinimumCommand: 65535 MaximumCommand: 65535 QueueRefsValid: TRUE
+2023-05-31T17:09:52.725+00:00 TMA-PXI LabVIEW_Custom_Log: SubscribeSubsystem: BoschTask MinimumCommand: 10357 MaximumCommand: 10357 QueueRefsValid: TRUE
+2023-05-31T17:09:52.727+00:00 TMA-PXI LabVIEW_Custom_Log: BoschTask started.
+2023-05-31T17:09:59.461+00:00 TMA-PXI LabVIEW_Custom_Log: SubscribeSubsystem: DeployablePlatform MinimumCommand: 1201 MaximumCommand: 1299 QueueRefsValid: TRUE
+2023-05-31T17:09:59.479+00:00 TMA-PXI LabVIEW_Custom_Log: DP initialization actions completed
+2023-05-31T17:09:59.480+00:00 TMA-PXI LabVIEW_Custom_Log: DP_Instance_Init_DeployablePlatform2
+2023-05-31T17:09:59.482+00:00 TMA-PXI LabVIEW_Custom_Log: DP_Instance_Init_DeployablePlatform1
+2023-05-31T17:09:59.521+00:00 TMA-PXI LabVIEW_Custom_Log: SubscribeSubsystem: CCW MinimumCommand: 1001 MaximumCommand: 1099 QueueRefsValid: TRUE
+2023-05-31T17:09:59.681+00:00 TMA-PXI LabVIEW_Custom_Log: SubscribeSubsystem: Balancing MinimumCommand: 1101 MaximumCommand: 1199 QueueRefsValid: TRUE
+2023-05-31T17:09:59.685+00:00 TMA-PXI LabVIEW_Custom_Log: Balancing init actions completed
+2023-05-31T17:10:10.431+00:00 TMA-PXI LabVIEW_Custom_Log: SubscribeSubsystem: LockingPin MinimumCommand: 1401 MaximumCommand: 1499 QueueRefsValid: TRUE
+2023-05-31T17:10:10.434+00:00 TMA-PXI LabVIEW_Custom_Log: LockingPin init actions completed
+2023-05-31T17:10:10.440+00:00 TMA-PXI LabVIEW_Custom_Log: CCW initialization actions completed
+2023-05-31T17:10:10.953+00:00 TMA-PXI LabVIEW_Custom_Log: SubscribeSubsystem: MirrorCoverLocks MinimumCommand: 1501 MaximumCommand: 1599 QueueRefsValid: TRUE
+2023-05-31T17:10:10.956+00:00 TMA-PXI LabVIEW_Custom_Log: MCL initialization actions completed
+2023-05-31T17:10:12.434+00:00 TMA-PXI LabVIEW_Custom_Log: MirrorCoverSequencerStarted
+2023-05-31T17:10:12.816+00:00 TMA-PXI LabVIEW_Custom_Log: SubscribeSubsystem: MirrorCover MinimumCommand: 901 MaximumCommand: 999 QueueRefsValid: TRUE
+2023-05-31T17:10:12.820+00:00 TMA-PXI LabVIEW_Custom_Log: MC initialization actions completed
+2023-05-31T17:10:19.519+00:00 TMA-PXI LabVIEW_Custom_Log: DP MonitoringTask InitActions Completed
+2023-05-31T17:11:48.722+00:00 TMA-PXI LabVIEW_Custom_Log: Main Axes Waiting Bosch
+2023-05-31T17:11:48.928+00:00 TMA-PXI LabVIEW_Custom_Log: Start Main Axes
+2023-05-31T17:12:43.200+00:00 TMA-PXI LabVIEW_Custom_Log: EIB Init
+2023-05-31T17:12:48.233+00:00 TMA-PXI LabVIEW_Custom_Log: Waiting EIB and ACW
+2023-05-31T17:12:48.950+00:00 TMA-PXI LabVIEW_Custom_Log: SubscribeSubsystem: Azimuth MinimumCommand: 101 MaximumCommand: 399 QueueRefsValid: TRUE
+2023-05-31T17:12:48.954+00:00 TMA-PXI LabVIEW_Custom_Log: Initialized Azimuth
+2023-05-31T17:12:48.954+00:00 TMA-PXI LabVIEW_Custom_Log: SubscribeSubsystem: EIB MinimumCommand: 701 MaximumCommand: 799 QueueRefsValid: TRUE
+2023-05-31T17:12:49.451+00:00 TMA-PXI LabVIEW_Custom_Log: Initialized Elevation
+2023-05-31T17:12:49.452+00:00 TMA-PXI LabVIEW_Custom_Log: SubscribeSubsystem: Elevation MinimumCommand: 401 MaximumCommand: 599 QueueRefsValid: TRUE
+```
+
+- Connect to AxesPXI and check that the AxesPXI restarted properly.
+
+```bash
+admin@AxesPXI:~# cat /var/log/messages | grep LabVIEW_Custom
+2023-05-30T16:12:23.216+00:00 AxesPXI LabVIEW_Custom_Log: Main Started
+2023-05-30T16:12:28.216+00:00 AxesPXI LabVIEW_Custom_Log: Main axes task launched
+2023-05-30T16:12:28.217+00:00 AxesPXI LabVIEW_Custom_Log: Encoder task launched
+2023-05-30T16:12:28.221+00:00 AxesPXI LabVIEW_Custom_Log: Timed Loops Processors: Control Loop Azimuth: 5
+2023-05-30T16:12:28.225+00:00 AxesPXI LabVIEW_Custom_Log: Timed Loops Processors: Control Loop Elevation: 6
+2023-05-30T16:12:28.818+00:00 AxesPXI LabVIEW_Custom_Log: Timed Loops Processors: Trajectory Loop Azimuth: 4
+2023-05-30T16:12:31.410+00:00 AxesPXI LabVIEW_Custom_Log: Timed Loops Processors: Trajectory Loop Elevation: 4
+2023-05-30T16:12:34.902+00:00 AxesPXI LabVIEW_Custom_Log: Timed Loops Processors: Monitoring Loop 1: 2
+2023-05-30T16:12:35.401+00:00 AxesPXI LabVIEW_Custom_Log: Timed Loops Processors: Encoder UPD Loop: 7
+```
+
+- Start the EUI.
+- Open the Encoder window and power on the encoder and check it works correctly, without faults. Perhaps it needs a couple of reset-power actions.
