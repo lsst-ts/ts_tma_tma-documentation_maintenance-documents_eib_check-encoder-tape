@@ -158,8 +158,33 @@ Next steps shows how to perform the capture of the data. During this operation t
   - Move again to the copied position.
 - Close the Indraworks.
 - Exit the EUI.
+- Reboot the TMA-PXI.
+  - Connect to the TMA-PXI using ssh and check that the connected PXI is the TMA-PXI.
+
+```bash
+$ ssh admin@139.229.171.3
+NI Linux Real-Time (run mode)
+
+Log in with your NI-Auth credentials.
+
+Last login: Wed May 31 17:10:27 2023 from 139.229.171.5
+
+████████ ███    ███  █████        ██████  ██   ██ ██
+   ██    ████  ████ ██   ██       ██   ██  ██ ██  ██
+   ██    ██ ████ ██ ███████ █████ ██████    ███   ██
+   ██    ██  ██  ██ ██   ██       ██       ██ ██  ██
+   ██    ██      ██ ██   ██       ██      ██   ██ ██
+
+```
+
+  - Reboot the PXI
+
+```bash
+  admin@TMA-PXI:~# reboot
+```
+
 - Reboot the AxesPXI.
-  - Connect to the AxesPXI using ssh and check that the connected PXI is the AxePXI.
+  - Connect to the AxesPXI using ssh and check that the connected PXI is the AxesPXI.
 
 ```bash
 $ ssh admin@139.229.171.26
@@ -184,8 +209,49 @@ Last login: Tue May 30 16:20:11 2023 from 139.229.171.5
   admin@AxesPXI:~# reboot
 ```
 
-- Wait for AxesPXI to restart. Check with a ping.
-- Check that the AxesPXI restarted properly.
+- Wait for TMA-PXI to restart. Check with a ping.
+- Connect to TMA-PXI and check that the TMA-PXI restarted properly.
+
+```bash
+admin@TMA-PXI:~# cat /var/log/messages | grep LabVIEW_Custom
+2023-05-31T17:09:24.350+00:00 TMA-PXI LabVIEW_Custom_Log: Init RT_MCS_Main
+2023-05-31T17:09:41.311+00:00 TMA-PXI LabVIEW_Custom_Log: StartingTCPTask
+2023-05-31T17:09:43.252+00:00 TMA-PXI LabVIEW_Custom_Log: StartedTCPTaskAndDelaysSettingsReadDone
+2023-05-31T17:09:43.388+00:00 TMA-PXI LabVIEW_Custom_Log: SubscribeSubsystem: DiscreteStateReporting MinimumCommand: 2501 MaximumCommand: 2599 QueueRefsValid: TRUE
+2023-05-31T17:09:43.403+00:00 TMA-PXI LabVIEW_Custom_Log: SubscribeSubsystem: Safety MinimumCommand: 1801 MaximumCommand: 1899 QueueRefsValid: TRUE
+2023-05-31T17:09:43.437+00:00 TMA-PXI LabVIEW_Custom_Log: SafetyTask_Started
+2023-05-31T17:09:47.497+00:00 TMA-PXI LabVIEW_Custom_Log: BoschPowerSupplyTask started
+2023-05-31T17:09:47.500+00:00 TMA-PXI LabVIEW_Custom_Log: SubscribeSubsystem: BoschPowerSupply MinimumCommand: 65535 MaximumCommand: 65535 QueueRefsValid: TRUE
+2023-05-31T17:09:52.725+00:00 TMA-PXI LabVIEW_Custom_Log: SubscribeSubsystem: BoschTask MinimumCommand: 10357 MaximumCommand: 10357 QueueRefsValid: TRUE
+2023-05-31T17:09:52.727+00:00 TMA-PXI LabVIEW_Custom_Log: BoschTask started.
+2023-05-31T17:09:59.461+00:00 TMA-PXI LabVIEW_Custom_Log: SubscribeSubsystem: DeployablePlatform MinimumCommand: 1201 MaximumCommand: 1299 QueueRefsValid: TRUE
+2023-05-31T17:09:59.479+00:00 TMA-PXI LabVIEW_Custom_Log: DP initialization actions completed
+2023-05-31T17:09:59.480+00:00 TMA-PXI LabVIEW_Custom_Log: DP_Instance_Init_DeployablePlatform2
+2023-05-31T17:09:59.482+00:00 TMA-PXI LabVIEW_Custom_Log: DP_Instance_Init_DeployablePlatform1
+2023-05-31T17:09:59.521+00:00 TMA-PXI LabVIEW_Custom_Log: SubscribeSubsystem: CCW MinimumCommand: 1001 MaximumCommand: 1099 QueueRefsValid: TRUE
+2023-05-31T17:09:59.681+00:00 TMA-PXI LabVIEW_Custom_Log: SubscribeSubsystem: Balancing MinimumCommand: 1101 MaximumCommand: 1199 QueueRefsValid: TRUE
+2023-05-31T17:09:59.685+00:00 TMA-PXI LabVIEW_Custom_Log: Balancing init actions completed
+2023-05-31T17:10:10.431+00:00 TMA-PXI LabVIEW_Custom_Log: SubscribeSubsystem: LockingPin MinimumCommand: 1401 MaximumCommand: 1499 QueueRefsValid: TRUE
+2023-05-31T17:10:10.434+00:00 TMA-PXI LabVIEW_Custom_Log: LockingPin init actions completed
+2023-05-31T17:10:10.440+00:00 TMA-PXI LabVIEW_Custom_Log: CCW initialization actions completed
+2023-05-31T17:10:10.953+00:00 TMA-PXI LabVIEW_Custom_Log: SubscribeSubsystem: MirrorCoverLocks MinimumCommand: 1501 MaximumCommand: 1599 QueueRefsValid: TRUE
+2023-05-31T17:10:10.956+00:00 TMA-PXI LabVIEW_Custom_Log: MCL initialization actions completed
+2023-05-31T17:10:12.434+00:00 TMA-PXI LabVIEW_Custom_Log: MirrorCoverSequencerStarted
+2023-05-31T17:10:12.816+00:00 TMA-PXI LabVIEW_Custom_Log: SubscribeSubsystem: MirrorCover MinimumCommand: 901 MaximumCommand: 999 QueueRefsValid: TRUE
+2023-05-31T17:10:12.820+00:00 TMA-PXI LabVIEW_Custom_Log: MC initialization actions completed
+2023-05-31T17:10:19.519+00:00 TMA-PXI LabVIEW_Custom_Log: DP MonitoringTask InitActions Completed
+2023-05-31T17:11:48.722+00:00 TMA-PXI LabVIEW_Custom_Log: Main Axes Waiting Bosch
+2023-05-31T17:11:48.928+00:00 TMA-PXI LabVIEW_Custom_Log: Start Main Axes
+2023-05-31T17:12:43.200+00:00 TMA-PXI LabVIEW_Custom_Log: EIB Init
+2023-05-31T17:12:48.233+00:00 TMA-PXI LabVIEW_Custom_Log: Waiting EIB and ACW
+2023-05-31T17:12:48.950+00:00 TMA-PXI LabVIEW_Custom_Log: SubscribeSubsystem: Azimuth MinimumCommand: 101 MaximumCommand: 399 QueueRefsValid: TRUE
+2023-05-31T17:12:48.954+00:00 TMA-PXI LabVIEW_Custom_Log: Initialized Azimuth
+2023-05-31T17:12:48.954+00:00 TMA-PXI LabVIEW_Custom_Log: SubscribeSubsystem: EIB MinimumCommand: 701 MaximumCommand: 799 QueueRefsValid: TRUE
+2023-05-31T17:12:49.451+00:00 TMA-PXI LabVIEW_Custom_Log: Initialized Elevation
+2023-05-31T17:12:49.452+00:00 TMA-PXI LabVIEW_Custom_Log: SubscribeSubsystem: Elevation MinimumCommand: 401 MaximumCommand: 599 QueueRefsValid: TRUE
+```
+
+- Connect to AxesPXI and check that the AxesPXI restarted properly.
 
 ```bash
 admin@AxesPXI:~# cat /var/log/messages | grep LabVIEW_Custom
@@ -226,6 +292,15 @@ Elevation must be moved with the winches connected to the telescope and using th
 Some of the steps shown for elevation are equivalent to ones in the azimuth axis. So, some figures are omitted in this section but can be found in the [Azimuth Tape Execution](#azimuth-tape-execution).
 
 - Start the OSS using the EUI.
-- Check that there are not any interlocks for the azimuth axis.
+- Check that there are not any interlocks for the elevation axis.
+- Move the locking pins to FREE positions using the EUI.
+- Make sure that winches are taut.
 - Open the PAS4000 and the last version of the TMA safety project (TMA_IS1). The support PC, has the last version of this project hosted in this [repo](https://gitlab.tekniker.es/aut/projects/3151-LSST/SafetyCode/TMA_IS.git).
 - Open the variable list and run the observing of the variables.
+- Force the oss variables
+- configure eib
+- Start upd
+- Release brake
+- start movement
+- The speed can be verified in the "Axis" window
+- If the axis must be stopped, stop the data capture and brake the axis if necessary (it is safer to brake the axis)
