@@ -46,7 +46,7 @@ Next steps shows how to perform the capture of the data. During this operation t
 
 - Start the OSS using the EUI.
 - Check that there are not any interlocks for the azimuth axis.
-- Open the PAS4000 and the last version of the TMA safety project (TMA_IS1). The support PC, has the last version of this project hosted in this [repo](https://gitlab.tekniker.es/aut/projects/3151-LSST/SafetyCode/TMA_IS.git).
+- Open the PAS4000 and the last version of the TMA safety project (TMA_IS1). The support PC, has the last version of this project hosted in this [repo](https://github.com/lsst-ts/ts_tma_safety-code_tma-is).
 - Open the variable list and run the observing of the variables.
 
   ![Open Variable List](media/OpenVariableList.png)
@@ -295,7 +295,7 @@ Some of the steps shown for elevation are equivalent to ones in the azimuth axis
 - Check that there are not any interlocks for the elevation axis.
 - Move the locking pins to FREE positions using the EUI.
 - Make sure that winches are taut.
-- Open the PAS4000 and the last version of the TMA safety project (TMA_IS1). The support PC, has the last version of this project hosted in this [repo](https://gitlab.tekniker.es/aut/projects/3151-LSST/SafetyCode/TMA_IS.git).
+- Open the PAS4000 and the last version of the TMA safety project (TMA_IS1). The support PC, has the last version of this project hosted in this [repo](https://github.com/lsst-ts/ts_tma_safety-code_tma-is).
 - Open the variable list and run the observing of the variables.
 - Force the OSS variables sdoHasStopOss and sdoSoftStopOss to avoid affecting the OSS if a E-Stop must be pressed during the test.
 - Check that the variables are forced.
